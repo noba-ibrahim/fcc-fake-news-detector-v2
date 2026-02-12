@@ -1001,9 +1001,9 @@ else:
                                 
                                 col1, col2, col3 = st.columns(3)
                                 with col1:
-                                    st.metric(t('fake_prob'), f"{probabilities[0]*100:.1f}%")
+                                    st.metric(t('fake_prob'), f"{probabilities[1]*100:.1f}%")
                                 with col2:
-                                    st.metric(t('reliable_prob'), f"{probabilities[1]*100:.1f}%")
+                                    st.metric(t('reliable_prob'), f"{probabilities[0]*100:.1f}%")
                                 with col3:
                                     st.metric(t('language'), get_language_name(detected_lang))
                                 
