@@ -24,7 +24,7 @@ from utils import (
 # ================================================
 # CONFIGURATION API RENDER
 # ================================================
-API_URL = "https://fcc-fake-news-detector-v2.onrender.com/"
+API_URL = "https://fcc-fake-news-detector-v2.onrender.com"
 
 def call_api_predict(text):
     """Appeler l'API Render pour prédiction avec gestion cold start"""
