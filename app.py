@@ -27,21 +27,42 @@ from utils import (
 API_URL = "https://fcc-fake-news-detector-v2.onrender.com"
 
 def call_api_predict(text):
-    """Appeler l'API Render pour prédiction"""
+    """Appeler l'API Render pour prédiction avec gestion cold start"""
     try:
-        response = requests.post(
-            f"{API_URL}/predict",
-            json={"text": text},
-            timeout=60
-        )
+        # Afficher un spinner pendant l'appel
+        with st.spinner("⏳ Connexion au backend ML..."):
+            response = requests.post(
+                f"{API_URL}/predict",
+                json={"text": text},
+                timeout=90
+            )
+        
         if response.status_code == 200:
             result = response.json()
             prediction = result['prediction']
             probabilities = [result['probabilities']['fake'], result['probabilities']['real']]
             return prediction, probabilities
         else:
+            st.error(f"❌ Erreur API : Code {response.status_code}")
             return None, None
-    except:
+    
+    except requests.exceptions.Timeout:
+        st.warning("""
+        ⏱️ **Cold Start Détecté**
+        
+        Le backend était en veille (plan gratuit Render).
+        Il est maintenant réveillé ! 
+        
+        👉 **Cliquez à nouveau sur 'Analyser' (ça marchera cette fois)**
+        """)
+        return None, None
+    
+    except requests.exceptions.ConnectionError:
+        st.error("❌ Impossible de contacter le backend. Vérifiez votre connexion internet.")
+        return None, None
+    
+    except Exception as e:
+        st.error(f"❌ Erreur inattendue : {str(e)}")
         return None, None
 # ================================================
 
