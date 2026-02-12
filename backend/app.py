@@ -173,7 +173,7 @@ def health():
         }), 500
 
 
-@app.route('/predict', methods=['POST'])
+@app.route('/predict', methods=['POST', 'GET'])
 def predict():
     """
     Endpoint principal pour la prédiction de fake news
