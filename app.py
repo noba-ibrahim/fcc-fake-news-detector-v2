@@ -26,22 +26,52 @@ from utils import (
 # ================================================
 API_URL = "https://fcc-fake-news-detector-v2.onrender.com"
 
-def call_api_predict(text):
-    """Appeler l'API Render pour prédiction avec gestion cold start"""
+def wake_up_backend():
+    """Réveiller le backend si endormi (cold start prevention)"""
     try:
-        # Afficher un spinner pendant l'appel
-        with st.spinner("⏳ Connexion au backend ML..."):
+        requests.get(f"{API_URL}/health", timeout=5)
+    except:
+        pass  # Silence, c'est juste pour ping
+
+def call_api_predict(text):
+    """
+    Appeler l'API Render pour prédiction avec gestion complète des erreurs
+    
+    Args:
+        text (str): Texte à analyser
+        
+    Returns:
+        tuple: (prediction, probabilities) ou (None, None) si erreur
+    """
+    try:
+        # Afficher spinner pendant l'appel
+        with st.spinner("⏳ Connexion au backend Random Forest Optimized..."):
             response = requests.post(
                 f"{API_URL}/predict",
                 json={"text": text},
-                timeout=90
+                timeout=90  # 90s pour gérer cold start
             )
         
+        # Vérifier le code de statut
         if response.status_code == 200:
             result = response.json()
             prediction = result['prediction']
             probabilities = [result['probabilities']['fake'], result['probabilities']['real']]
+            
+            # Log succès (optionnel)
+            if 'model' in result:
+                st.success(f"✅ Analyse effectuée avec {result['model']}")
+            
             return prediction, probabilities
+        
+        elif response.status_code == 400:
+            st.error("❌ Erreur : Texte invalide ou trop court (minimum 10 caractères)")
+            return None, None
+        
+        elif response.status_code == 500:
+            st.error("❌ Erreur serveur : Les modèles ML n'ont pas pu être chargés")
+            return None, None
+        
         else:
             st.error(f"❌ Erreur API : Code {response.status_code}")
             return None, None
@@ -50,20 +80,38 @@ def call_api_predict(text):
         st.warning("""
         ⏱️ **Cold Start Détecté**
         
-        Le backend était en veille (plan gratuit Render).
-        Il est maintenant réveillé ! 
+        Le backend gratuit Render.com se met en veille après 15 minutes d'inactivité.
+        Il est maintenant réveillé (cela prend 30-60 secondes la première fois).
         
-        👉 **Cliquez à nouveau sur 'Analyser' (ça marchera cette fois)**
+        👉 **Cliquez à nouveau sur 'Analyser'** - ça marchera cette fois !
         """)
         return None, None
     
     except requests.exceptions.ConnectionError:
-        st.error("❌ Impossible de contacter le backend. Vérifiez votre connexion internet.")
+        st.error("""
+        ❌ **Erreur de Connexion**
+        
+        Impossible de contacter le backend. Vérifications :
+        - Votre connexion internet est active
+        - Le service Render est opérationnel
+        
+        🔗 Vérifiez : https://fcc-fake-news-detector-v2.onrender.com/health
+        """)
+        return None, None
+    
+    except requests.exceptions.RequestException as e:
+        st.error(f"❌ Erreur réseau : {str(e)}")
         return None, None
     
     except Exception as e:
         st.error(f"❌ Erreur inattendue : {str(e)}")
         return None, None
+
+# Réveiller le backend au chargement de l'app (prévention cold start)
+if 'backend_woken' not in st.session_state:
+    with st.spinner("🔄 Initialisation du backend..."):
+        wake_up_backend()
+    st.session_state.backend_woken = True
 # ================================================
 
 # Configuration de la page
@@ -1237,7 +1285,7 @@ else:
                 with st.expander("VUE D'ENSEMBLE DU SYSTÈME", expanded=True):
                     st.markdown("""
                     Le **Détecteur de Fake News FCC** est un système avancé d'apprentissage automatique conçu pour identifier 
-                    la désinformation et les fake news avec une précision de **99.69%**.
+                    la désinformation et les fake news avec une précision de **98.34%**.
                     
                     **Points Clés:**
                     - Modèle: Random Forest Optimisé
