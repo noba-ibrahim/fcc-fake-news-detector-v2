@@ -963,14 +963,18 @@ else:
                                 st.info(f"{len(extracted_text)} characters extracted" if st.session_state.language == 'en' else f"{len(extracted_text)} caractères extraits")
                                 
                                 source_lang = None if lang_file == "auto" else lang_file
-                                text_to_analyze, detected_lang = translate_to_english(extracted_text, source_lang)
+                                # ✅ CORRECTION ICI : récupérer 3 valeurs au lieu de 2
+                                text_to_analyze, detected_lang, original_text = translate_to_english(extracted_text, source_lang)
                                 
                                 if detected_lang != 'en':
                                     st.info(f"Text translated from {get_language_name(detected_lang)}" if st.session_state.language == 'en' else f"Texte traduit de {get_language_name(detected_lang)}")
                                 
-                                text_vectorized = vectorizer.transform([text_to_analyze])
-                                prediction = model.predict(text_vectorized)[0]
-                                probabilities = model.predict_proba(text_vectorized)[0]
+                                # Appel API (remplacer l'ancien code)
+                                prediction, probabilities = call_api_predict(text_to_analyze)
+                                
+                                if prediction is None:
+                                    st.error("❌ " + ("API Error. Retry in 30s." if st.session_state.language == 'en' else "Erreur API. Réessayez dans 30s."))
+                                    st.stop()
                                 
                                 st.session_state.history.append({
                                     'timestamp': datetime.now(),
@@ -995,9 +999,9 @@ else:
                                 
                                 col1, col2, col3 = st.columns(3)
                                 with col1:
-                                    st.metric("Fake News", f"{probabilities[1]*100:.1f}%")
+                                    st.metric(t('fake_prob'), f"{probabilities[0]*100:.1f}%")
                                 with col2:
-                                    st.metric(t('reliable'), f"{probabilities[0]*100:.1f}%")
+                                    st.metric(t('reliable_prob'), f"{probabilities[1]*100:.1f}%")
                                 with col3:
                                     st.metric(t('language'), get_language_name(detected_lang))
                                 
