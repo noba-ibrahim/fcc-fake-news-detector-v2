@@ -19,7 +19,10 @@ from utils import (
     detect_language,
     get_language_name
 )
-# ✅ set_page_config IMMÉDIATEMENT après imports
+
+# ================================================
+# CONFIGURATION PAGE (DOIT ÊTRE EN PREMIER !)
+# ================================================
 st.set_page_config(
     page_title="FCC Fake News Detector",
     page_icon="🛡️",
@@ -113,14 +116,15 @@ def call_api_predict(text):
         st.error(f"❌ Erreur inattendue : {str(e)}")
         return None, None
 
+# ================================================
+# INITIALISATION (APRÈS set_page_config)
+# ================================================
 # Réveiller le backend au chargement de l'app (prévention cold start)
 if 'backend_woken' not in st.session_state:
     with st.spinner("🔄 Initialisation du backend..."):
         wake_up_backend()
     st.session_state.backend_woken = True
 # ================================================
-
-
 
 
 # Dictionnaire de traductions
@@ -895,9 +899,9 @@ else:
                             fig = go.Figure()
                             fig.add_trace(go.Bar(
                                 x=[fake_label, reliable_label],
-                                y=[probabilities[0]*100, probabilities[1]*100],
+                                y=[ probabilities[1]*100 , probabilities[0]*100],
                                 marker=dict(
-                                    color=['#DC143C', '#0052CC'],
+                                    color=[ '#0052CC', '#DC143C'],
                                     line=dict(color='white', width=2)
                                 ),
                                 text=[f"{probabilities[0]*100:.1f}%", f"{probabilities[1]*100:.1f}%"],
@@ -991,9 +995,9 @@ else:
                                 
                                 col1, col2, col3 = st.columns(3)
                                 with col1:
-                                    st.metric("Fake News", f"{probabilities[0]*100:.1f}%")
+                                    st.metric("Fake News", f"{probabilities[1]*100:.1f}%")
                                 with col2:
-                                    st.metric(t('reliable'), f"{probabilities[1]*100:.1f}%")
+                                    st.metric(t('reliable'), f"{probabilities[0]*100:.1f}%")
                                 with col3:
                                     st.metric(t('language'), get_language_name(detected_lang))
                                 
@@ -1593,7 +1597,7 @@ if st.button("Analyze"):
                 with st.expander("SYSTEM OVERVIEW", expanded=True):
                     st.markdown("""
                     The **FCC Fake News Detector** is an advanced machine learning system designed to identify 
-                    misinformation and fake news with **99.69% precision**.
+                    misinformation and fake news with **99.72% precision**.
                     
                     **Key Points:**
                     - Model: Random Forest Optimized
