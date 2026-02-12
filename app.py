@@ -19,7 +19,13 @@ from utils import (
     detect_language,
     get_language_name
 )
-
+# ✅ set_page_config IMMÉDIATEMENT après imports
+st.set_page_config(
+    page_title="FCC Fake News Detector",
+    page_icon="🛡️",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
 # ================================================
 # CONFIGURATION API RENDER
@@ -114,13 +120,8 @@ if 'backend_woken' not in st.session_state:
     st.session_state.backend_woken = True
 # ================================================
 
-# Configuration de la page
-st.set_page_config(
-    page_title="FCC Fake News Detector",
-    page_icon="🛡️",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
+
+
 
 # Dictionnaire de traductions
 TRANSLATIONS = {
