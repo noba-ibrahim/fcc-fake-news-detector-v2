@@ -829,7 +829,7 @@ else:
                 with st.spinner("Translating..."):
                     try:
                         source_lang = None if lang_option == "auto" else lang_option
-                        translated_text, detected_lang = translate_to_english(article_text, source_lang)
+                        translated_text, detected_lang, original_text = translate_to_english(article_text, source_lang)
                         
                         st.success(f"Detected Language: {get_language_name(detected_lang)}")
                         
@@ -883,9 +883,9 @@ else:
                             
                             col1, col2, col3, col4 = st.columns(4)
                             with col1:
-                                st.metric(t('fake_prob'), f"{probabilities[0]*100:.1f}%")
+                                st.metric(t('fake_prob'), f"{probabilities[1]*100:.1f}%")
                             with col2:
-                                st.metric(t('reliable_prob'), f"{probabilities[1]*100:.1f}%")
+                                st.metric(t('reliable_prob'), f"{probabilities[0]*100:.1f}%")
                             with col3:
                                 st.metric(t('char_count'), len(article_text))
                             with col4:
@@ -899,12 +899,14 @@ else:
                             fig = go.Figure()
                             fig.add_trace(go.Bar(
                                 x=[fake_label, reliable_label],
-                                y=[ probabilities[1]*100 , probabilities[0]*100],
+                                # ❌ AVANT (FAUX) : y=[probabilities[1]*100, probabilities[0]*100],
+                                y=[probabilities[1]*100, probabilities[0]*100],  # ✅ Fake d'abord, puis Reliable
                                 marker=dict(
-                                    color=[ '#0052CC', '#DC143C'],
+                                    color=['#DC143C', '#0052CC'],  # ✅ Rouge pour Fake, Bleu pour Reliable
                                     line=dict(color='white', width=2)
                                 ),
-                                text=[f"{probabilities[0]*100:.1f}%", f"{probabilities[1]*100:.1f}%"],
+                                # ❌ AVANT (FAUX) : text=[f"{probabilities[0]*100:.1f}%", f"{probabilities[1]*100:.1f}%"],
+                                text=[f"{probabilities[1]*100:.1f}%", f"{probabilities[0]*100:.1f}%"],  # ✅ CORRECT
                                 textposition='outside',
                                 textfont=dict(size=16, color='#1A1A1A')
                             ))
